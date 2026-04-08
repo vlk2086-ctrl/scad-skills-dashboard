@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCAD Continuous Skills Assessment Dashboard</title>
+<style>
+  :root {
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --purple: #7F3CAE;
+    --purple-light: #F0E8F8;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --green: #3B6D11;
+    --green-light: #EAF3DE;
+    --red: #993C1D;
+    --gray: #5F5E5A;
+    --gray-light: #F1EFE8;
+    --bg: #ffffff;
+    --bg2: #f7f7f5;
+    --bg3: #efefec;
+    --text: #1a1a1a;
+    --text2: #5a5a56;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.2);
+    --radius: 12px;
+    --radius-sm: 6px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg2: #252523;
+      --bg3: #2e2e2b;
+      --text: #e8e8e4;
+      --text2: #9a9a94;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.18);
+      --blue-light: #0c3a6b;
+      --teal-light: #083d30;
+      --purple-light: #3d1a5e;
+      --amber-light: #5c3200;
+      --green-light: #1a3808;
+      --gray-light: #2a2a27;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    background: var(--bg2);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  .page-header {
+    max-width: 860px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .page-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .scad-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--blue);
+    color: #fff;
+    letter-spacing: .04em;
+  }
+
+  .dash {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 12px;
+  }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  @media (max-width: 600px) {
+    .row2, .row3 { grid-template-columns: 1fr; }
+    .span2 { grid-column: span 1 !important; }
+  }
+
+  /* Header card */
+  .header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .student-name { font-size: 20px; font-weight: 600; }
+  .student-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+  select {
+    font-size: 13px;
+    padding: 6px 10px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+  }
+
+  select:focus { border-color: var(--blue); }
+
+  /* Ring */
+  .ring-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .ring-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+  }
+
+  .ring-wrap svg { position: absolute; top: 0; left: 0; }
+  .ring-num { font-size: 20px; font-weight: 600; color: var(--text); z-index: 1; }
+  .ring-label { font-size: 12px; color: var(--text2); }
+
+  /* Skill bars */
+  .plabel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+    font-size: 12px;
+  }
+
+  .plabel-left { color: var(--text2); }
+  .plabel-right { display: flex; align-items: center; gap: 6px; }
+
+  .course-tag {
+    font-size: 11px;
+    color: var(--text2);
+    background: var(--bg2);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+
+  .tier-label {
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .career-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bg3);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .career-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .gap-note {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  /* Chips */
+  .skill-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    margin: 2px 2px 2px 0;
+  }
+
+  .chip-have { background: var(--teal-light); color: var(--teal); }
+  .chip-gap { background: var(--amber-light); color: var(--amber); border: 0.5px dashed var(--amber); }
+
+  .have-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .gap-item { margin-bottom: 12px; }
+  .gap-course { font-size: 11px; color: var(--text2); margin: 3px 0 0 4px; }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Timeline */
+  .tier-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .tier-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .tier-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .titem {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .titem:last-child { border-bottom: none; }
+
+  .titem-event {
+    background: var(--purple-light);
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    margin: 3px 0;
+    border-bottom: none;
+  }
+
+  .titem-yr {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    min-width: 24px;
+    padding-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .titem-label {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .titem-label.event-label { font-weight: 600; }
+
+  /* Buttons */
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 14px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-size: 12px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+  }
+
+  .btn:hover { background: var(--bg2); }
+
+  /* Footer */
+  .footer {
+    max-width: 860px;
+    margin: 20px auto 0;
+    font-size: 11px;
+    color: var(--text2);
+    text-align: center;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-title">Continuous Skills Assessment Framework</div>
+  <span class="scad-badge">SCAD · Game Development BFA</span>
+</div>
+
+<div class="dash">
+
+  <!-- Student header -->
+  <div class="card header-card">
+    <div>
+      <div class="student-name">Jordan Alvarez</div>
+      <div class="student-sub">Game Development, BFA &middot; Year 3 &middot; Savannah</div>
+    </div>
+    <select id="goal-select" onchange="updateGoal(this.value)">
+      <option value="gp">Career goal: Game Producer</option>
+      <option value="gd">Career goal: Game Designer</option>
+      <option value="td">Career goal: Technical Director</option>
+    </select>
+  </div>
+
+  <!-- Ring + bars -->
+  <div class="row3">
+    <div class="card ring-card">
+      <div class="card-label">Career match</div>
+      <div class="ring-wrap">
+        <svg viewBox="0 0 80 80" width="80" height="80">
+          <circle cx="40" cy="40" r="33" fill="none" stroke="var(--bg3)" stroke-width="7"/>
+          <circle id="ring-circle" cx="40" cy="40" r="33" fill="none" stroke="#185FA5"
+            stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="207.3" stroke-dashoffset="52"
+            transform="rotate(-90 40 40)"/>
+        </svg>
+        <span class="ring-num" id="ring-num">75%</span>
+      </div>
+      <div class="ring-label" id="goal-title">Game Producer</div>
+    </div>
+
+    <div class="card span2" style="grid-column: span 2;">
+      <div class="card-label">Skills progress toward goal</div>
+      <div id="skill-bars"></div>
+      <div class="gap-note" id="gap-note"></div>
+    </div>
+  </div>
+
+  <!-- Have / gaps -->
+  <div class="row2">
+    <div class="card">
+      <div class="card-label">Skills demonstrated &mdash; with source</div>
+      <div id="skills-have"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Skill gaps &mdash; courses that close them</div>
+      <div id="skills-gap"></div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="card">
+    <div class="card-label">Assessment journey &mdash; Game Development BFA</div>
+    <div class="tier-legend">
+      <div class="tier-legend-item"><span class="tier-dot" style="background:#185FA5"></span>Tier 1: Gen Ed / Foundation</div>
+      <div class="tier-legend-item"><span class="tier-dot" style="background:#0F6E56"></span>Tier 2: Major courses</div>
+      <div class="tier-legend-item"><span class="tier-dot" style="background:#7F3CAE"></span>Tier 3: Professional experience</div>
+    </div>
+    <div id="timeline"></div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="btn-row">
+    <button class="btn" onclick="alert('In the live system, this would surface recommended SCAD courses based on your gap profile.')">Suggest next courses &rarr;</button>
+    <button class="btn" onclick="alert('In the live system, this would open the full skills map for your career goal.')">Full skills map &rarr;</button>
+    <button class="btn" onclick="alert('In the live system, this would generate an employer-facing skills report.')">Employer view &rarr;</button>
+  </div>
+
+</div>
+
+<div class="footer">
+  SCAD Continuous Skills Assessment Framework &middot; Prototype &middot; Assessment and Curriculum Division 2026<br>
+  Course data sourced from the SCAD 2025&ndash;2026 Academic Catalog &middot; <a href="https://catalog.scad.edu" style="color:var(--text2)">catalog.scad.edu</a>
+</div>
+
+<script>
+const TC = { 1: "#185FA5", 2: "#0F6E56", 3: "#7F3CAE" };
+const TL = { 1: "Tier 1", 2: "Tier 2", 3: "Tier 3" };
+const SC = { done: "#3B6D11", active: "#BA7517", future: "#5F5E5A", gap: "#993C1D", event: "#7F3CAE" };
+const SL = { done: "Assessed", active: "In progress", future: "Upcoming", gap: "Gap", event: "Assessed — event" };
+
+const goals = {
+  gp: {
+    label: "Game Producer", match: 75,
+    bars: [
+      { name: "Critical thinking", pct: 88, tier: 1, course: "ENGL 123" },
+      { name: "Communication — oral", pct: 82, tier: 1, course: "COMM 105" },
+      { name: "Collaboration", pct: 90, tier: 1, course: "FOUN 113" },
+      { name: "Agility / adaptability", pct: 70, tier: 2, course: "Game Jam + GAME 256" },
+      { name: "Design thinking", pct: 78, tier: 1, course: "FOUN 110" },
+      { name: "Project leadership", pct: 58, tier: 3, course: "Hackathon + GAME 405" },
+      { name: "Budget / production mgmt", pct: 22, tier: 3, course: "gap" },
+      { name: "AI literacy", pct: 40, tier: 2, course: "DIGI 130" },
+      { name: "Risk and scope mgmt", pct: 18, tier: 3, course: "gap" },
+    ],
+    have: [
+      { skill: "Critical thinking", course: "ENGL 123" },
+      { skill: "Oral communication", course: "COMM 105" },
+      { skill: "Collaboration under pressure", course: "FOUN 113 + Hackathon" },
+      { skill: "Design thinking", course: "FOUN 110" },
+      { skill: "Rapid iteration", course: "Game Jam — Fall Y2" },
+      { skill: "Digital communication", course: "DIGI 130" },
+    ],
+    gaps: [
+      { skill: "Budget / production mgmt", course: "BUSI 110 deeper track or SCADpros" },
+      { skill: "Risk and scope mgmt", course: "GAME 479 Internship or 500-level SCADpro" },
+      { skill: "Leadership depth", course: "GAME 465 Studio II — in plan for Y4" },
+    ],
+    gapNote: "5 skills fully met · 2 in progress · 2 gaps to close",
+    timeline: [
+      { yr: "Y1", label: "FOUN 110 — Design Thinking and Process", tier: 1, status: "done", event: false },
+      { yr: "Y1", label: "FOUN 113 — Creative Collaboration Lab", tier: 1, status: "done", event: false },
+      { yr: "Y1", label: "ENGL 123 — Ideas to Ink: Critical Writing", tier: 1, status: "done", event: false },
+      { yr: "Y1", label: "COMM 105 — Speaking of Ideas", tier: 1, status: "done", event: false },
+      { yr: "Y2", label: "GAME 121 — Introduction to Game Development", tier: 2, status: "done", event: false },
+      { yr: "Y2", label: "GAME 256 — Core Principles: Game Design", tier: 2, status: "done", event: false },
+      { yr: "Y2", label: "SCAD Game Jam — Fall · collaboration, rapid iteration, agility", tier: 3, status: "event", event: true },
+      { yr: "Y3", label: "GAME 380 — Game Development Portfolio", tier: 2, status: "active", event: false },
+      { yr: "Y3", label: "GAME 405 — Game Development Studio I", tier: 2, status: "active", event: false },
+      { yr: "Y3", label: "SCAD Hackathon — Spring · project leadership, scoping, team communication", tier: 3, status: "event", event: true },
+      { yr: "Y4", label: "GAME 465 — Game Development Studio II", tier: 3, status: "future", event: false },
+      { yr: "Y4", label: "500-level SCADpros Elective", tier: 3, status: "future", event: false },
+      { yr: "Y4", label: "GAME 479 — Internship (budget / scope mgmt gap)", tier: 3, status: "gap", event: false },
+    ]
+  },
+  gd: {
+    label: "Game Designer", match: 85,
+    bars: [
+      { name: "Critical thinking", pct: 88, tier: 1, course: "ENGL 123" },
+      { name: "Design thinking", pct: 80, tier: 1, course: "FOUN 110" },
+      { name: "Visual storytelling", pct: 82, tier: 1, course: "FOUN 111" },
+      { name: "Game design principles", pct: 88, tier: 2, course: "GAME 256 + 356" },
+      { name: "Collaboration", pct: 90, tier: 1, course: "FOUN 113 + Game Jam" },
+      { name: "Agility / rapid iteration", pct: 78, tier: 3, course: "Game Jam + GAME 356" },
+      { name: "User research / playtesting", pct: 58, tier: 2, course: "GAME 405" },
+      { name: "Written communication", pct: 80, tier: 1, course: "ENGL 123" },
+      { name: "Technical systems thinking", pct: 42, tier: 2, course: "gap" },
+    ],
+    have: [
+      { skill: "Design thinking", course: "FOUN 110" },
+      { skill: "Visual storytelling", course: "FOUN 111" },
+      { skill: "Game design principles", course: "GAME 256 + 356" },
+      { skill: "Critical thinking", course: "ENGL 123" },
+      { skill: "Rapid iteration under constraints", course: "Game Jam — Fall Y2" },
+      { skill: "Color and visual literacy", course: "FOUN 112" },
+    ],
+    gaps: [
+      { skill: "Technical systems thinking", course: "GAME 266 Core Principles: Game Tech" },
+      { skill: "User research depth", course: "GAME 465 Studio II — deepens this" },
+      { skill: "AI-assisted design tools", course: "DIGI 130 or Applied AI elective" },
+    ],
+    gapNote: "6 skills fully met · 2 in progress · 1 gap to close",
+    timeline: [
+      { yr: "Y1", label: "FOUN 110 — Design Thinking and Process", tier: 1, status: "done", event: false },
+      { yr: "Y1", label: "FOUN 111 — Sketching and Drawing", tier: 1, status: "done", event: false },
+      { yr: "Y1", label: "FOUN 112 — Color in Context", tier: 1, status: "done", event: false },
+      { yr: "Y1", label: "FOUN 113 — Creative Collaboration Lab", tier: 1, status: "done", event: false },
+      { yr: "Y2", label: "GAME 256 — Core Principles: Game Design", tier: 2, status: "done", event: false },
+      { yr: "Y2", label: "GAME 130 — Digital Design Aesthetics", tier: 2, status: "done", event: false },
+      { yr: "Y2", label: "SCAD Game Jam — Fall · rapid prototyping, rules of play, agility", tier: 3, status: "event", event: true },
+      { yr: "Y3", label: "GAME 356 — Applied Principles: Game Design", tier: 2, status: "active", event: false },
+      { yr: "Y3", label: "GAME 380 — Game Development Portfolio", tier: 2, status: "active", event: false },
+      { yr: "Y3", label: "SCAD Hackathon — Spring · cross-disciplinary problem solving, leadership", tier: 3, status: "event", event: true },
+      { yr: "Y4", label: "GAME 405 — Game Development Studio I", tier: 3, status: "future", event: false },
+      { yr: "Y4", label: "GAME 465 — Game Development Studio II", tier: 3, status: "future", event: false },
+      { yr: "Y4", label: "GAME 266 — Game Tech gap: systems thinking", tier: 3, status: "gap", event: false },
+    ]
+  },
+  td: {
+    label: "Technical Director", match: 68,
+    bars: [
+      { name: "Programming fundamentals", pct: 75, tier: 2, course: "GAME 220" },
+      { name: "Critical thinking", pct: 88, tier: 1, course: "ENGL 123" },
+      { name: "Systems / engine pipeline", pct: 65, tier: 2, course: "GAME 266" },
+      { name: "Applied programming", pct: 55, tier: 2, course: "GAME 326" },
+      { name: "Collaboration", pct: 88, tier: 1, course: "FOUN 113 + Hackathon" },
+      { name: "Rapid prototyping", pct: 62, tier: 3, course: "Hackathon + Game Jam" },
+      { name: "Real-time rendering", pct: 40, tier: 2, course: "gap" },
+      { name: "Technical leadership", pct: 48, tier: 3, course: "Hackathon — team lead" },
+      { name: "AI / scripting tools", pct: 35, tier: 2, course: "DIGI 130" },
+    ],
+    have: [
+      { skill: "Programming fundamentals", course: "GAME 220" },
+      { skill: "Game tech principles", course: "GAME 266" },
+      { skill: "Critical thinking", course: "ENGL 123" },
+      { skill: "Rapid prototyping under pressure", course: "Hackathon — Y3" },
+      { skill: "Collaboration", course: "FOUN 113 + Game Jam" },
+      { skill: "Design thinking", course: "FOUN 110" },
+    ],
+    gaps: [
+      { skill: "Real-time rendering / level design", course: "GAME 236 Core Principles: Game Art" },
+      { skill: "Advanced scripting", course: "GAME 366 Applied Principles: Game Tech" },
+      { skill: "Technical leadership depth", course: "GAME 465 Studio II or SCADpros" },
+    ],
+    gapNote: "4 skills fully met · 3 in progress · 2 gaps to close",
+    timeline: [
+      { yr: "Y1", label: "FOUN 110 — Design Thinking and Process", tier: 1, status: "done", event: false },
+      { yr: "Y1", label: "FOUN 113 — Creative Collaboration Lab", tier: 1, status: "done", event: false },
+      { yr: "Y1", label: "ENGL 123 — Ideas to Ink: Critical Writing", tier: 1, status: "done", event: false },
+      { yr: "Y2", label: "GAME 220 — Core Principles: Programming", tier: 2, status: "done", event: false },
+      { yr: "Y2", label: "GAME 266 — Core Principles: Game Tech", tier: 2, status: "done", event: false },
+      { yr: "Y2", label: "SCAD Game Jam — Fall · rapid builds, technical problem-solving, iteration", tier: 3, status: "event", event: true },
+      { yr: "Y3", label: "GAME 326 — Applied Principles: Programming", tier: 2, status: "active", event: false },
+      { yr: "Y3", label: "GAME 380 — Game Development Portfolio", tier: 2, status: "active", event: false },
+      { yr: "Y3", label: "SCAD Hackathon — Spring · technical lead role, cross-team coordination", tier: 3, status: "event", event: true },
+      { yr: "Y4", label: "GAME 366 — Applied Principles: Game Tech", tier: 3, status: "future", event: false },
+      { yr: "Y4", label: "GAME 465 — Game Development Studio II", tier: 3, status: "future", event: false },
+      { yr: "Y4", label: "GAME 236 — Game Art gap: real-time rendering", tier: 3, status: "gap", event: false },
+    ]
+  }
+};
+
+function updateGoal(v) {
+  const g = goals[v];
+
+  document.getElementById("ring-num").textContent = g.match + "%";
+  document.getElementById("goal-title").textContent = g.label;
+  const offset = (207.3 * (1 - g.match / 100)).toFixed(1);
+  document.getElementById("ring-circle").setAttribute("stroke-dashoffset", offset);
+
+  document.getElementById("skill-bars").innerHTML = g.bars.map(b => `
+    <div class="plabel">
+      <span class="plabel-left">${b.name}</span>
+      <span class="plabel-right">
+        <span class="course-tag">${b.course === "gap" ? "—" : b.course}</span>
+        <span class="tier-label" style="color:${TC[b.tier]}">${TL[b.tier]}</span>
+      </span>
+    </div>
+    <div class="career-bar">
+      <div class="career-fill" style="width:${b.pct}%;background:${TC[b.tier]};opacity:0.85"></div>
+    </div>
+  `).join("");
+
+  document.getElementById("skills-have").innerHTML = g.have.map(s => `
+    <div class="have-row">
+      <span class="skill-chip chip-have">&#10003; ${s.skill}</span>
+      <span class="course-tag">${s.course}</span>
+    </div>
+  `).join("");
+
+  document.getElementById("skills-gap").innerHTML = g.gaps.map(s => `
+    <div class="gap-item">
+      <span class="skill-chip chip-gap">+ ${s.skill}</span>
+      <div class="gap-course">${s.course}</div>
+    </div>
+  `).join("");
+
+  document.getElementById("gap-note").textContent = g.gapNote;
+
+  document.getElementById("timeline").innerHTML = g.timeline.map(t => `
+    <div class="titem${t.event ? " titem-event" : ""}">
+      <span class="titem-yr">${t.yr}</span>
+      <span class="tier-dot" style="background:${TC[t.tier]};margin-top:3px;flex-shrink:0"></span>
+      <span class="titem-label${t.event ? " event-label" : ""}">${t.label}</span>
+      <span class="badge" style="background:${SC[t.status]}20;color:${SC[t.status]}">${SL[t.status]}</span>
+    </div>
+  `).join("");
+}
+
+updateGoal("gp");
+</script>
+</body>
+</html>
